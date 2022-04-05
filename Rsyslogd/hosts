@@ -1,0 +1,18 @@
+[app]
+# IP address of your machine
+
+
+[app:vars]
+ansible_user= # User on your instance
+ansible_become= # Like a sudo behind a command
+ansible_become_pass= # Password of your user
+
+
+[rsyslog]
+# IP address of your machine
+
+
+[rsyslog:vars]
+ansible_user= # User on your instance
+ansible_become= # Like a sudo behind a command
+ansible_become_pass= # Password of your user
