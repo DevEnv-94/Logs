@@ -1,0 +1,70 @@
+---
+
+- name: Getting rsyslog from apt repository
+
+  hosts: all
+  tasks:
+      - name: Update repositories cache and install rsyslog 
+        apt:
+          name: rsyslog
+          state: present
+          update_cache: True
+
+
+- name: Configure rsyslog to send logs from [app] instances to [rsyslog] instances
+
+  hosts: app
+  tasks:
+    - name: Copy template 22-app.conf for rsyslogd with owner and permissions
+      ansible.builtin.template:
+          src: 20-app.conf.j2
+          dest: /etc/rsyslog.d/20-app.conf
+          owner: root
+          group: root
+          mode: '0664'
+
+    - name: Ensure that rsyslog restarted
+      ansible.builtin.systemd:
+        state: restarted
+        name: rsyslog
+        enabled: yes
+
+    - name: Ensure that rsyslog started
+      ansible.builtin.systemd:
+        state: started
+        name: rsyslog
+        enabled: yes
+
+
+- name: Configure rsyslog to send logs from [app] instances to [rsyslog] instances
+
+  hosts: rsyslog
+  tasks:
+
+    - name: Create a /var/log/rsyslog/ directory if it does not exist
+      ansible.builtin.file:
+        path: /var/log/rsyslog/
+        state: directory
+        mode: '0755'
+        owner: syslog
+        group: syslog
+
+    - name: Copy 22-rsyslog.conf file with owner and permissions
+      ansible.builtin.copy:
+        src: 22-rsyslog.conf
+        dest: /etc/rsyslog.d/
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Ensure that rsyslog restarted
+      ansible.builtin.systemd:
+        state: restarted
+        name: rsyslog
+        enabled: yes
+
+    - name: Ensure that rsyslog started
+      ansible.builtin.systemd:
+        state: started
+        name: rsyslog
+        enabled: yes
