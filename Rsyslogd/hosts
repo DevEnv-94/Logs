@@ -4,7 +4,7 @@
 
 [app:vars]
 ansible_user= # User on your instance
-ansible_become= # Like a sudo behind a command
+ansible_become=true # Like a sudo behind a command
 ansible_become_pass= # Password of your user
 
 
@@ -14,5 +14,5 @@ ansible_become_pass= # Password of your user
 
 [rsyslog:vars]
 ansible_user= # User on your instance
-ansible_become= # Like a sudo behind a command
+ansible_become=true # Like a sudo behind a command
 ansible_become_pass= # Password of your user
