@@ -1,0 +1,2 @@
+syslog.=crit @{{ hostvars[groups['node'][0]]['ansible_eth1']['ipv4']['address'] }};RSYSLOG_SyslogProtocol23Format  # sends only crytical  priority syslog messages 
+cron.*;cron.!=debug @{{ hostvars[groups['node'][0]]['ansible_eth1']['ipv4']['address'] }}:515;RSYSLOG_SyslogProtocol23Format # sends all cron messages except debug priority
