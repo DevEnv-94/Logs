@@ -18,7 +18,7 @@
       - name: install fluent-plugin-remote_syslog
         ansible.builtin.shell: td-agent-gem install fluent-plugin-remote_syslog
 
-      - name: Template a file to /etc/file.conf
+      - name: Template td-agent.conf.j2 to /etc/td-agent/td-agent.conf
         ansible.builtin.template:
           src: td-agent.conf.j2
           dest: /etc/td-agent/td-agent.conf
