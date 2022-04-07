@@ -1,0 +1,33 @@
+---
+
+- name: Installation and using a basic configuration of Fluentd
+
+  hosts: fluentd
+  tasks:
+      - name: Install Fluentd on Ubuntu Focal
+        ansible.builtin.shell: curl -fsSL https://toolbelt.treasuredata.com/sh/install-ubuntu-focal-td-agent4.sh | sh
+        args:
+          creates: /etc/td-agent/td-agent.conf
+
+      - name: Make sure a fluentd service  is running
+        ansible.builtin.systemd:
+          state: started
+          name: td-agent
+          enabled: yes
+
+      - name: install fluent-plugin-remote_syslog
+        ansible.builtin.shell: td-agent-gem install fluent-plugin-remote_syslog
+
+      - name: Template a file to /etc/file.conf
+        ansible.builtin.template:
+          src: td-agent.conf.j2
+          dest: /etc/td-agent/td-agent.conf
+          owner: root
+          group: root
+          mode: '0664'
+
+      - name: Make sure a fluentd service restarted
+        ansible.builtin.systemd:
+          state: restarted
+          name: td-agent
+          enabled: yes
