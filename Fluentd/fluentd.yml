@@ -1,0 +1,60 @@
+---
+
+- name: Install and using a configuration of Fluentd which gets nginx access logs, parse and filter and then sends them to /tmp/4xx-5xx or /tmp/1xx-3xx depends on status code
+
+  hosts: fluentd
+  tasks:
+      - name: Install Fluentd on Ubuntu Focal
+        ansible.builtin.shell: curl -fsSL https://toolbelt.treasuredata.com/sh/install-ubuntu-focal-td-agent4.sh | sh
+        args:
+          creates: /etc/td-agent/td-agent.conf
+
+
+      - name: copy td-agent.conf to /etc/td-agent/td-agent.conf
+        ansible.builtin.copy:
+          src: td-agent.conf
+          dest: /etc/td-agent/td-agent.conf
+          owner: root
+          group: root
+          mode: '0664'
+
+      - name: Make sure a fluentd service restarted
+        ansible.builtin.systemd:
+          state: restarted
+          name: td-agent
+          enabled: yes
+
+- name: Install nginx and configure site to check fluentd configuration
+
+  hosts: fluentd
+  tasks:
+      - name: Update repositories cache and install nginx
+        apt:
+          name: nginx
+          state: present
+          update_cache: True
+
+      - name: Template nginx_site.conf to /etc/nginx/sites-enabled/nginx_site.conf
+        ansible.builtin.copy:
+          src: nginx_site.conf
+          dest: /etc/nginx/sites-enabled/nginx_site
+          owner: root
+          group: root
+          mode: '0664'
+
+      - name: Remove nginx default.conf  
+        ansible.builtin.file:
+          path: /etc/nginx/sites-enabled/default
+          state: absent
+
+      - name: Ensure that nginx restarted
+        ansible.builtin.systemd:
+          state: restarted
+          name: nginx
+          enabled: yes
+
+      - name: Ensure that nginx started (must be OK)
+        ansible.builtin.systemd:
+          state: started
+          name: nginx
+          enabled: yes
