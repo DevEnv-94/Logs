@@ -1,0 +1,53 @@
+#td-agent --dry-run -c /etc/td-agent/td-agent.conf 
+#aws s3 ls s3://{{ s3_bucket }} --recursive
+
+<source>
+
+  @type forward
+  port 24225
+  bind 0.0.0.0
+  add_tag_prefix host
+
+</source>
+
+
+<match host.**>
+
+  @type copy
+
+  <store>
+
+  @type file
+  path /tmp/logs/${tag[1]}/${tag[4]}
+  append true
+
+    <buffer tag>
+
+      @type file
+      path /var/log/td-agent/file
+      timekey 1m
+
+    </buffer>
+
+  </store>
+
+  <store>
+
+  @type s3
+    aws_key_id {{ aws_key_id }}
+    aws_sec_key {{ aws_sec_key }}
+    s3_bucket {{ s3_bucket }}
+    s3_region {{ s3_region }}
+    path logs/${tag[1]}/${tag[4]}.${tag[5]}
+
+    <buffer tag>
+
+      @type file
+      path /var/log/td-agent/s3
+      timekey 1m
+
+    </buffer>
+
+  </store>
+
+</match>
