@@ -1,0 +1,89 @@
+---
+
+- name: Install Fluentd
+
+  hosts: app,logs
+  tasks:
+      - name: Install Fluentd on Ubuntu Focal
+        ansible.builtin.shell: curl -fsSL https://toolbelt.treasuredata.com/sh/install-ubuntu-focal-td-agent4.sh | sh
+        args:
+          creates: /etc/td-agent/td-agent.conf
+
+
+- name: Copy Fluentd configuration file to log instance
+
+  hosts: logs
+  tasks:
+
+      - name: Template td-agent.logs.conf.j2 to /etc/td-agent/td-agent.conf
+        ansible.builtin.template:
+          src: td-agent.logs.conf.j2
+          dest: /etc/td-agent/td-agent.conf
+          owner: root
+          group: root
+          mode: '0664'
+
+      - name: Make sure a fluentd service restarted
+        ansible.builtin.systemd:
+          state: restarted
+          name: td-agent
+          enabled: yes
+
+
+- name: Make for Fluentd user read permissions to /var/log/*.log files and Copy Fluentd configuration file to app instances
+
+  hosts: app
+  tasks:
+
+      - name: Update repositories cache and install acl
+        apt:
+          name: acl
+          state: present
+          update_cache: True
+
+      - name: Grant user td-agent read access /var/log/auth.log
+        ansible.posix.acl:
+          path: /var/log/auth.log
+          entity: td-agent
+          etype: user
+          permissions: r
+          state: present
+
+      - name: Grant user td-agent read access /var/log/cloud-init-output.log
+        ansible.posix.acl:
+          path: /var/log/cloud-init-output.log
+          entity: td-agent
+          etype: user
+          permissions: r
+          state: present
+
+      - name: Grant user td-agent read access /var/log/kern.log
+        ansible.posix.acl:
+          path: /var/log/kern.log
+          entity: td-agent
+          etype: user
+          permissions: r
+          state: present
+
+      - name: Grant user td-agent read access /var/log/cloud-init.log
+        ansible.posix.acl:
+          path: /var/log/cloud-init.log
+          entity: td-agent
+          etype: user
+          permissions: r
+          state: present
+
+      - name: Template td-agent.app.conf.j2 to /etc/td-agent/td-agent.conf
+        ansible.builtin.template:
+          src: td-agent.app.conf.j2
+          dest: /etc/td-agent/td-agent.conf
+          owner: root
+          group: root
+          mode: '0664'
+
+      - name: Make sure a fluentd service restarted
+        ansible.builtin.systemd:
+          state: restarted
+          name: td-agent
+          enabled: yes
+
