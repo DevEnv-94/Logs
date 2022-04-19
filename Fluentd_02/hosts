@@ -1,0 +1,18 @@
+[app]
+     ansible_become=true    ansible_user=user    ansible_become_pass=
+     ansible_become=true    ansible_user=user    ansible_become_pass=
+
+[logs]
+
+
+[logs:vars]
+ansible_become=true
+ansible_user=
+ansible_become_pass=
+
+aws_key_id=
+aws_sec_key=
+s3_bucket=
+s3_region=""
+
+
