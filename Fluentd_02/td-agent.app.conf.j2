@@ -1,0 +1,43 @@
+#td-agent --dry-run -c /etc/td-agent/td-agent.conf 
+
+<source>
+
+  @type tail
+  path /var/log/*.log
+  pos_file /var/log/td-agent/pos_file.log.pos
+  tag {{ ansible_hostname }}.*
+  
+  <parse>
+    @type none
+  </parse>
+
+</source>
+
+
+<filter {{ ansible_hostname }}.**>
+
+  @type record_transformer
+  <record>
+    tag "${tag}"
+  </record>
+
+</filter>
+
+<match {{ ansible_hostname }}.**>
+  @type forward
+
+  <buffer tag>
+
+    @type file
+    path /var/log/td-agent/file
+    timekey 1m
+
+  </buffer>
+
+  <server>
+    host {{ hostvars[groups['logs'][0]]['ansible_eth1']['ipv4']['address'] }}
+    port 24225
+  </server>
+
+</match>
+
