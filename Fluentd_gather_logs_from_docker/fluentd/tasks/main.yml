@@ -1,0 +1,33 @@
+---
+# tasks file for fluentd
+
+
+  - name: Install Fluentd on Ubuntu Focal
+    ansible.builtin.shell: curl -fsSL https://toolbelt.treasuredata.com/sh/install-ubuntu-focal-td-agent4.sh | sh
+    args:
+      creates: /etc/td-agent/td-agent.conf
+
+
+  - name: copy td-agent.conf to /etc/td-agent/td-agent.conf
+    ansible.builtin.copy:
+      src: files/td-agent.conf
+      dest: /etc/td-agent/td-agent.conf
+      owner: root
+      group: root
+      mode: '0664'
+
+  - name: Create a /var/log/fluentd directory if it does not exist
+    ansible.builtin.file:
+      path: /var/log/fluentd
+      state: directory
+      mode: '0755'
+      owner: td-agent
+      group: td-agent  
+
+  - name: Make sure a fluentd service restarted
+    ansible.builtin.systemd:
+      state: restarted
+      name: td-agent
+      enabled: yes
+
+    
