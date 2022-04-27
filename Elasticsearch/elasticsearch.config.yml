@@ -1,0 +1,32 @@
+
+cluster.name: elastic-test
+
+node.name: server
+
+path.data: /var/lib/elasticsearch
+
+path.logs: /var/log/elasticsearch
+
+http.port: 9200
+
+xpack.security.enabled: false
+
+xpack.security.enrollment.enabled: false
+
+
+xpack.security.http.ssl:
+  enabled: true
+  keystore.path: certs/http.p12
+
+
+xpack.security.transport.ssl:
+  enabled: true
+  verification_mode: certificate
+  keystore.path: certs/transport.p12
+  truststore.path: certs/transport.p12
+
+cluster.initial_master_nodes: ["server"]
+
+
+http.host: [_local_, _site_]
+
