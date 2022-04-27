@@ -1,0 +1,116 @@
+---
+
+
+- name: Install elasticsearch and Fluentd configure to send logs to elasticsearch 
+
+  hosts: elasticsearch
+  tasks:
+
+#elasticsearch
+
+      - name: add elasticsearch GPG key
+        apt_key:
+          url: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+          state: present
+
+      - name: add elasticsearch main repository to apt repository
+        apt_repository:
+          repo: deb https://artifacts.elastic.co/packages/8.x/apt stable main
+          state: present
+
+      - name: Update repositories cache and install elasticsearch
+        apt:
+          name: "{{ item }}"
+          state: present
+          update_cache: True
+        with_items:
+          - apt-transport-https
+          - elasticsearch
+
+      - name: Copy a "elasticsearch.yml" 
+        ansible.builtin.copy:
+          src: /etc/elasticsearch/elasticsearch.yml
+          dest: /etc/elasticsearch/elasticsearch.config.yml
+          remote_src: yes
+
+      - name: Start service elasticsearch, in all cases, also issue daemon-reload to pick up config changes
+        ansible.builtin.systemd:
+          state: started
+          daemon_reload: yes
+          name: elasticsearch
+          enabled: yes
+
+      - name: copy elasticsearch.config.yml to /etc/elasticsearch/elasticsearch.yml
+        ansible.builtin.copy:
+          src: elasticsearch.config.yml
+          dest: /etc/elasticsearch/elasticsearch.yml
+          owner: root
+          group: root
+          mode: '0664'
+
+      - name: Restart service elasticsearch
+        ansible.builtin.systemd:
+          state: restarted
+          name: elasticsearch
+          enabled: yes
+
+#Fluentd
+
+      - name: Install Fluentd on Ubuntu Focal
+        ansible.builtin.shell: curl -fsSL https://toolbelt.treasuredata.com/sh/install-ubuntu-focal-td-agent4.sh | sh
+        args:
+          creates: /etc/td-agent/td-agent.conf
+
+      - name: copy td-agent.conf to /etc/td-agent/td-agent.conf
+        ansible.builtin.copy:
+          src: td-agent.conf
+          dest: /etc/td-agent/td-agent.conf
+          owner: root
+          group: root
+          mode: '0664'
+
+      - name: Make sure a fluentd service restarted
+        ansible.builtin.systemd:
+          state: restarted
+          name: td-agent
+          enabled: yes
+
+#ACL read permissions to /var/log/*.log files 
+
+      - name: Update repositories cache and install acl
+        apt:
+          name: acl
+          state: present
+          update_cache: True
+
+      - name: Grant user td-agent read access /var/log/auth.log
+        ansible.posix.acl:
+          path: /var/log/auth.log
+          entity: td-agent
+          etype: user
+          permissions: r
+          state: present
+
+      - name: Grant user td-agent read access /var/log/cloud-init-output.log
+        ansible.posix.acl:
+          path: /var/log/cloud-init-output.log
+          entity: td-agent
+          etype: user
+          permissions: r
+          state: present
+
+      - name: Grant user td-agent read access /var/log/kern.log
+        ansible.posix.acl:
+          path: /var/log/kern.log
+          entity: td-agent
+          etype: user
+          permissions: r
+          state: present
+
+      - name: Grant user td-agent read access /var/log/cloud-init.log
+        ansible.posix.acl:
+          path: /var/log/cloud-init.log
+          entity: td-agent
+          etype: user
+          permissions: r
+          state: present
