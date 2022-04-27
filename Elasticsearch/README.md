@@ -42,14 +42,14 @@ http.host: [_local_, _site_]
 ```bash
 
 #td-agent --dry-run -c /etc/td-agent/td-agent.conf 
-
+#curl -XGET http://localhost:9200/_search?size=100 | jq
 
 <source>
 
   @type tail
   path /var/log/*.log
   pos_file /var/log/td-agent/pos_file.log.pos
-  tag task07.*
+  tag elastic.*
   
   <parse>
     @type none
@@ -57,7 +57,7 @@ http.host: [_local_, _site_]
 
 </source>
 
-<match task07.**>
+<match elastic.**>
 
   @type elasticsearch
   host 127.0.0.1
@@ -75,7 +75,7 @@ http.host: [_local_, _site_]
     path /var/log/td-agent/buf
     flush_at_shutdown true
     flush_interval 10s
-    
+
   </buffer>
 
 </match>
