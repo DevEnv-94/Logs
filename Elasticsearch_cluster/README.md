@@ -41,9 +41,19 @@
 
 ```
 
+```bash
+
+curl -XGET 'http://VM_IP:9200/_cluster/state?pretty' #info about node in cluster
+sudo curl -sS -XGET 'http://{{ hostvars[groups['elasticsearch'][1]]['ansible_eth1']['ipv4']['address'] }}:9200/_cat/master?pretty' #who is master
+curl -XGET 'http://{{ hostvars[groups['elasticsearch'][2]]['ansible_eth1']['ipv4']['address'] }}:9200/_cluster/health?pretty' #cluster state
+curl -XGET http://{{ hostvars[groups['elasticsearch'][0]]['ansible_eth1']['ipv4']['address'] }}:9200/_search?size=100 | jq 
+
+```
+
+
 ```bash 
 
-Max Heap size not 32g
+As a general rule, the maximum heap size should be no more than 50% of RAM and no more than 32766m 
 
 -Xms32766m 
 -Xmx32766m
@@ -52,3 +62,140 @@ Max Heap size not 32g
 
 
 ![Elastic_scheme](https://github.com/DevEnv-94/Logs/blob/master/Elasticsearch_cluster/images/scheme.png)
+
+
+#### elasticsearch.yml cluster config file in ninja
+
+```bash
+
+cluster.name: test_es_cluster
+
+node.name: test-es-node-{{node_number}}
+
+{% if node_number == 2 -%}
+node.roles: [ data, master, voting_only ]
+{% else -%}
+node.roles: [ data, master ]
+{% endif %}
+
+network.host: {{ ansible_eth1.ipv4.address }}
+
+http.port: 9200
+
+discovery.seed_hosts: ["{{ hostvars[groups['elasticsearch'][0]]['ansible_eth1']['ipv4']['address'] }}", "{{ hostvars[groups['elasticsearch'][1]]['ansible_eth1']['ipv4']['address'] }}","{{ hostvars[groups['elasticsearch'][2]]['ansible_eth1']['ipv4']['address'] }}"]
+
+cluster.initial_master_nodes: ["test-es-node-1", "test-es-node-2","test-es-node-3"] 
+
+
+path.data: /var/lib/elasticsearch
+
+path.logs: /var/log/elasticsearch
+
+xpack.security.enabled: false
+
+xpack.security.enrollment.enabled: false
+
+xpack.security.http.ssl:
+  enabled: true
+  keystore.path: certs/http.p12
+
+
+xpack.security.transport.ssl:
+  enabled: true
+  verification_mode: certificate
+  keystore.path: certs/transport.p12
+  truststore.path: certs/transport.p12
+
+```
+
+#### Fluent.Apps config file in ninja
+
+```bash
+
+<source>
+  @type http
+  port 8080
+  bind 127.0.0.1
+  tag applogs.{{ ansible_hostname }}
+</source>
+
+<source>
+  @type syslog
+  port 55514
+  tag syslogs.{{ ansible_hostname }}
+  bind 127.0.0.1
+</source>
+
+<filter **>
+  @type record_transformer
+  enable_ruby true
+
+  <record>
+    tag ${tag}.${hostname}
+    hostname "#{Socket.gethostname}"
+  </record>
+</filter>
+
+<match {applogs.**,syslogs.**}>
+  @type forward
+
+  <server>
+    host {{ hostvars[groups['fluent'][0]]['ansible_eth1']['ipv4']['address'] }}
+    port 24224
+  </server>
+
+  <buffer>
+    @type file
+    path /var/log/td-agent/logs_buf/
+    flush_mode interval
+    flush_interval 10s
+    flush_at_shutdown true  
+  </buffer>
+</match>
+
+#<filter **>
+# @type record_transformer
+#  enable_ruby true
+#  <record>
+
+#    hostname "#{Socket.gethostname}"
+#    @timestamp ${time.strftime('%Y-%m-%dT%H:%M:%S')} #"2021-04-16T18:52:03"
+#  </record>
+#</filter>
+
+```
+
+#### Fluent.aggregator config file in ninja
+
+```bash
+
+<source>
+  @type forward
+  port 24224
+  bind {{ hostvars[groups['fluent'][0]]['ansible_eth1']['ipv4']['address'] }}
+</source>
+
+<source>
+  @type syslog
+  port 55514
+  tag syslogs
+  bind 127.0.0.1
+</source>
+
+<match {applogs,syslogs.**}>
+  @type elasticsearch
+
+  hosts {{ hostvars[groups['elasticsearch'][0]]['ansible_eth1']['ipv4']['address'] }}:9200,{{ hostvars[groups['elasticsearch'][1]]['ansible_eth1']['ipv4']['address'] }}:9200,{{ hostvars[groups['elasticsearch'][2]]['ansible_eth1']['ipv4']['address'] }}:9200
+  index_name ${tag[0]}
+  include_timestamp true
+  time_key_format %Y-%m-%dT%H:%M:%S
+    <buffer>
+      @type file
+      path /var/log/td-agent/log_buf/
+      flush_mode interval
+      flush_interval 10s
+      flush_at_shutdown true
+    </buffer>
+</match>
+
+```
