@@ -1,0 +1,52 @@
+#td-agent --dry-run -c /etc/td-agent/td-agent.conf 
+
+<source>
+  @type http
+  port 8080
+  bind 127.0.0.1
+  tag applogs.{{ ansible_hostname }}
+</source>
+
+<source>
+  @type syslog
+  port 55514
+  tag syslogs.{{ ansible_hostname }}
+  bind 127.0.0.1
+</source>
+
+<filter **>
+  @type record_transformer
+  enable_ruby true
+
+  <record>
+    tag ${tag}.${hostname}
+    hostname "#{Socket.gethostname}"
+  </record>
+</filter>
+
+<match {applogs.**,syslogs.**}>
+  @type forward
+
+  <server>
+    host {{ hostvars[groups['fluent'][0]]['ansible_eth1']['ipv4']['address'] }}
+    port 24224
+  </server>
+
+  <buffer>
+    @type file
+    path /var/log/td-agent/logs_buf/
+    flush_mode interval
+    flush_interval 10s
+    flush_at_shutdown true  
+  </buffer>
+</match>
+
+#<filter **>
+# @type record_transformer
+#  enable_ruby true
+#  <record>
+
+#    hostname "#{Socket.gethostname}"
+#    @timestamp ${time.strftime('%Y-%m-%dT%H:%M:%S')} #"2021-04-16T18:52:03"
+#  </record>
+#</filter>
