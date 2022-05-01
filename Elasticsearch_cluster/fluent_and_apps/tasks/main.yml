@@ -1,0 +1,90 @@
+---
+
+# tasks for fluentd
+
+  - name: Upgrade Ubuntu system
+    apt:
+      upgrade: full
+      update_cache: yes
+    tags: fluent_and_apps
+
+  - name: Install Fluentd on Ubuntu Focal
+    ansible.builtin.shell: curl -fsSL https://toolbelt.treasuredata.com/sh/install-ubuntu-focal-td-agent4.sh | sh
+    args:
+      creates: /etc/td-agent/td-agent.conf
+    tags: fluent_and_apps
+
+  - name: Templates td-agent.flunet.conf.j2 to /etc/td-agent/td-agent.conf
+    ansible.builtin.template:
+      src: templates/td-agent.fluent.conf.j2
+      dest: /etc/td-agent/td-agent.conf
+      owner: root
+      group: root
+      mode: '0664'
+    when: hostvars[inventory_hostname].group_names[0] == "fluent" 
+    tags: fluent_and_apps
+
+  - name: Templates td-agent.apps.conf.j2 to /etc/td-agent/td-agent.conf
+    ansible.builtin.template:
+      src: templates/td-agent.apps.conf.j2
+      dest: /etc/td-agent/td-agent.conf
+      owner: root
+      group: root
+      mode: '0664'
+    when: hostvars[inventory_hostname].group_names[0] == "apps" 
+    tags: fluent_and_apps
+
+  - name: Create a /var/log/fluentd directory if it does not exist
+    ansible.builtin.file:
+      path: /var/log/fluentd
+      state: directory
+      mode: '0755'
+      owner: td-agent
+      group: td-agent   
+    tags: fluent_and_apps
+
+  - name: Make sure a fluentd service restarted
+    ansible.builtin.systemd:
+      state: restarted
+      name: td-agent
+      enabled: yes
+    tags: fluent_and_apps
+# rsyslogd
+
+  - name: Copy 50-forward_syslogs.conf to /etc/rsyslog.d/50-forward_syslogs.conf
+    ansible.builtin.copy:
+      src: files/50-forward_syslogs.conf
+      dest: /etc/rsyslog.d/50-forward_syslogs.conf
+      owner: root
+      group: root
+      mode: '0664'
+    tags: fluent_and_apps
+
+  - name: Make sure a rsyslog service restarted
+    ansible.builtin.systemd:
+      state: restarted
+      name: rsyslog
+      enabled: yes
+    tags: fluent_and_apps
+
+#log_generator
+
+  - name: copy log_generator.sh to /tmp/log_generator
+    ansible.builtin.copy:
+      src: files/log_generator.sh
+      dest: /tmp/log_generator
+      owner: root
+      group: root
+      mode: '0774'
+    when:  hostvars[inventory_hostname].group_names[0] == "apps" 
+    tags: fluent_and_apps
+
+  - name: Ensure a log_generator script runs every minute.
+    ansible.builtin.cron:
+      name: "log_generator"
+      user: root
+      minute: "*/1"
+      job: "/tmp/log_generator"
+      cron_file: log_generator
+    when:  hostvars[inventory_hostname].group_names[0] == "apps" 
+    tags: fluent_and_apps
