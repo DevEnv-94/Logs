@@ -64,6 +64,16 @@ As a general rule, the maximum heap size should be no more than 50% of RAM and n
 ![Elastic_scheme](https://github.com/DevEnv-94/Logs/blob/master/Elasticsearch_cluster/images/scheme.png)
 
 
+#### Rsyslog config file
+
+```bash
+
+syslog.* {
+	action(type="omfwd" target="127.0.0.1" port="55514" protocol="udp")
+}
+
+```
+
 #### elasticsearch.yml cluster config file in ninja
 
 ```bash
@@ -199,7 +209,6 @@ xpack.security.transport.ssl:
 </match>
 
 ```
-
 
 #### Application(log_generator)
 
