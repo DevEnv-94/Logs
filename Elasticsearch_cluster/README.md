@@ -51,4 +51,4 @@ Max Heap size not 32g
 ```
 
 
-![Elastic_scheme](https://github.com/DevEnv-94/logs/blob/master/images/grafana.png)
+![Elastic_scheme](https://github.com/DevEnv-94/Logs/blob/master/Elasticsearch_cluster/images/scheme.png)
