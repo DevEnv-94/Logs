@@ -1,0 +1,18 @@
+---
+
+
+-
+
+  hosts: elasticsearch
+
+  roles:
+    - elasticsearch
+
+
+-
+
+  hosts: fluent,apps
+
+  roles:
+    - fluent_and_apps
+
