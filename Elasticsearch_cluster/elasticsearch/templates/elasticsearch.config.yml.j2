@@ -1,0 +1,43 @@
+#curl -XGET 'http://{{ hostvars[groups['elasticsearch'][0]]['ansible_eth1']['ipv4']['address'] }}:9200/_cluster/state?pretty' #info about node in cluster
+#sudo curl -sS -XGET 'http://{{ hostvars[groups['elasticsearch'][1]]['ansible_eth1']['ipv4']['address'] }}:9200/_cat/master?pretty' #who is master
+#curl -XGET 'http://{{ hostvars[groups['elasticsearch'][2]]['ansible_eth1']['ipv4']['address'] }}:9200/_cluster/health?pretty' 
+#curl -XGET http://{{ hostvars[groups['elasticsearch'][0]]['ansible_eth1']['ipv4']['address'] }}:9200/_search | jq
+
+cluster.name: test_es_cluster
+
+node.name: test-es-node-{{node_number}}
+
+{% if node_number == 2 -%}
+node.roles: [ data, master, voting_only ]
+{% else -%}
+node.roles: [ data, master ]
+{% endif %}
+
+network.host: {{ ansible_eth1.ipv4.address }}
+
+http.port: 9200
+
+discovery.seed_hosts: ["{{ hostvars[groups['elasticsearch'][0]]['ansible_eth1']['ipv4']['address'] }}", "{{ hostvars[groups['elasticsearch'][1]]['ansible_eth1']['ipv4']['address'] }}","{{ hostvars[groups['elasticsearch'][2]]['ansible_eth1']['ipv4']['address'] }}"]
+
+cluster.initial_master_nodes: ["test-es-node-1", "test-es-node-2","test-es-node-3"] 
+
+
+path.data: /var/lib/elasticsearch
+
+path.logs: /var/log/elasticsearch
+
+xpack.security.enabled: false
+
+xpack.security.enrollment.enabled: false
+
+xpack.security.http.ssl:
+  enabled: true
+  keystore.path: certs/http.p12
+
+
+xpack.security.transport.ssl:
+  enabled: true
+  verification_mode: certificate
+  keystore.path: certs/transport.p12
+  truststore.path: certs/transport.p12
+
