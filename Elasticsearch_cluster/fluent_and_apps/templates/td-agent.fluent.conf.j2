@@ -13,7 +13,7 @@
   bind 127.0.0.1
 </source>
 
-<match {applogs,syslogs.**}>
+<match {applogs.**,syslogs.**}>
   @type elasticsearch
 
   hosts {{ hostvars[groups['elasticsearch'][0]]['ansible_eth1']['ipv4']['address'] }}:9200,{{ hostvars[groups['elasticsearch'][1]]['ansible_eth1']['ipv4']['address'] }}:9200,{{ hostvars[groups['elasticsearch'][2]]['ansible_eth1']['ipv4']['address'] }}:9200
