@@ -167,7 +167,7 @@ xpack.security.transport.ssl:
 # @type record_transformer
 #  enable_ruby true
 #  <record>
-
+#    tag ${tag}.${hostname}
 #    hostname "#{Socket.gethostname}"
 #    @timestamp ${time.strftime('%Y-%m-%dT%H:%M:%S')} #"2021-04-16T18:52:03"
 #  </record>
@@ -192,7 +192,7 @@ xpack.security.transport.ssl:
   bind 127.0.0.1
 </source>
 
-<match {applogs,syslogs.**}>
+<match {applogs.**,syslogs.**}>
   @type elasticsearch
 
   hosts {{ hostvars[groups['elasticsearch'][0]]['ansible_eth1']['ipv4']['address'] }}:9200,{{ hostvars[groups['elasticsearch'][1]]['ansible_eth1']['ipv4']['address'] }}:9200,{{ hostvars[groups['elasticsearch'][2]]['ansible_eth1']['ipv4']['address'] }}:9200
