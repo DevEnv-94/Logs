@@ -44,9 +44,9 @@
 ```bash
 
 curl -XGET 'http://VM_IP:9200/_cluster/state?pretty' #info about node in cluster
-sudo curl -sS -XGET 'http://{{ hostvars[groups['elasticsearch'][1]]['ansible_eth1']['ipv4']['address'] }}:9200/_cat/master?pretty' #who is master
-curl -XGET 'http://{{ hostvars[groups['elasticsearch'][2]]['ansible_eth1']['ipv4']['address'] }}:9200/_cluster/health?pretty' #cluster state
-curl -XGET http://{{ hostvars[groups['elasticsearch'][0]]['ansible_eth1']['ipv4']['address'] }}:9200/_search?size=100 | jq 
+sudo curl -sS -XGET 'http://VM_IP:9200/_cat/master?pretty' #who is master
+curl -XGET 'http://VM_IP:9200/_cluster/health?pretty' #cluster state
+curl -XGET http://VM_IP:9200/_search?size=100 | jq 
 
 ```
 
