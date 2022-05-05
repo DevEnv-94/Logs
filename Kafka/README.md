@@ -1,7 +1,7 @@
 # Kafka
 
 
-![kafka.scheme](https://github.com/DevEnv-94/Logs/blob/master/kafka/images/scheme.png)
+![kafka.scheme](https://github.com/DevEnv-94/Logs/blob/master/Kafka/images/scheme.png)
 
 
 #### server.properties
