@@ -1,0 +1,18 @@
+---
+
+-
+
+  hosts: log_server
+
+  roles:
+    - elasticsearch
+    - kafka
+    - fluent
+
+-
+
+  hosts: app_server
+
+  roles:
+    - fluent
+    - nginx-app

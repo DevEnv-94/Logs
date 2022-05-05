@@ -1,0 +1,30 @@
+#td-agent --dry-run -c /etc/td-agent/td-agent.conf 
+
+<source>
+  @type kafka
+
+  brokers {{ ansible_eth1.ipv4.address }}:9092
+  topics test-logs
+  format json
+  add_prefix from_kafka
+
+</source>
+
+<match from_kafka**>
+
+  @type elasticsearch
+  host {{ ansible_eth1.ipv4.address }}
+  port 9200
+  index_name apps_logs
+  include_tag_key true
+  tag_key @log_name
+  <buffer>
+
+    @type file
+    path /var/log/td-agent/buf
+    flush_at_shutdown true
+    flush_interval 10s
+
+  </buffer>
+
+</match>

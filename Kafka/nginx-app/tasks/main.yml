@@ -1,0 +1,34 @@
+---
+# tasks file for nginx-app
+
+- name: Install nginx 
+  apt:
+    name: nginx 
+    state: latest
+    update_cache: yes
+
+- name: Make sure that nginx service stopped
+  ansible.builtin.systemd:
+    state: stopped
+    name: nginx
+    enabled: yes
+
+- name: copy app_site.conf to /etc/nginx/sites-enabled/app_site.conf
+  ansible.builtin.copy:
+    src: files/app_site.conf
+    dest: /etc/nginx/sites-enabled/app_site.conf
+    owner: root
+    group: root
+    mode: '0664'
+
+- name: Remove default config site in nginx 
+  ansible.builtin.file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+
+- name: Make sure that nginx service started
+  ansible.builtin.systemd:
+    state: started
+    name: nginx
+    enabled: yes
+

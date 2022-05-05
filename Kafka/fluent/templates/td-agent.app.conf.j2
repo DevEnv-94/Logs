@@ -1,0 +1,53 @@
+#td-agent --dry-run -c /etc/td-agent/td-agent.conf 
+
+<source>
+  @type tail
+  path /var/log/nginx/app1_access.log
+  pos_file /var/log/td-agent/nginx.access.app1.pos
+  tag nginx.access.app1
+  <parse>
+    @type nginx
+  </parse>
+</source>
+
+<source>
+  @type tail
+  path /var/log/nginx/app2_access.log
+  pos_file /var/log/td-agent/nginx.access.app2.pos
+  tag nginx.access.app2
+  <parse>
+    @type nginx
+  </parse>
+</source>
+
+
+<filter **>
+  @type record_transformer
+  enable_ruby true
+
+  <record>
+    @tag ${tag}
+  </record>
+</filter>
+
+
+<match nginx.access.**>
+  @type kafka2
+
+  brokers {{ hostvars[groups['log_server'][0]]['ansible_eth1']['ipv4']['address'] }}:9092
+
+  default_topic test-logs
+
+  <format>
+    @type json
+  </format>
+
+  <buffer>
+    @type file
+    path /var/log/td-agent/logs_buf/
+    flush_mode interval
+    flush_interval 10s
+    flush_at_shutdown true  
+  </buffer>
+
+</match>

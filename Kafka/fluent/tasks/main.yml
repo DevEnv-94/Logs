@@ -1,0 +1,46 @@
+---
+# tasks file for fluent
+
+  - name: Upgrade Ubuntu system
+    apt:
+      upgrade: full
+      update_cache: yes
+    tags: fluent
+
+  - name: Install Fluentd on Ubuntu Focal
+    ansible.builtin.shell: curl -fsSL https://toolbelt.treasuredata.com/sh/install-ubuntu-focal-td-agent4.sh | sh
+    args:
+      creates: /etc/td-agent/td-agent.conf
+    tags: fluent
+
+  - name: Templates td-agent.log.conf.j2 to /etc/td-agent/td-agent.conf
+    ansible.builtin.template:
+      src: templates/td-agent.log.conf.j2
+      dest: /etc/td-agent/td-agent.conf
+      owner: root
+      group: root
+      mode: '0664'
+    when: hostvars[inventory_hostname].group_names[0] == "log_server" 
+    tags: fluent
+
+  - name: Templates td-agent.app.conf.j2 to /etc/td-agent/td-agent.conf
+    ansible.builtin.template:
+      src: templates/td-agent.app.conf.j2
+      dest: /etc/td-agent/td-agent.conf
+      owner: root
+      group: root
+      mode: '0664'
+    when: hostvars[inventory_hostname].group_names[0] == "app_server" 
+    tags: fluent
+
+  - name: install fluent-plugin-kafka
+    ansible.builtin.shell: td-agent-gem install fluent-plugin-kafka
+    when: hostvars[inventory_hostname].group_names[0] == "log_server" 
+    tags: fluent
+
+  - name: Make sure a fluentd service restarted
+    ansible.builtin.systemd:
+      state: restarted
+      name: td-agent
+      enabled: yes
+    tags: fluent
