@@ -111,3 +111,24 @@ admin.enableServer=false
 </match>
 
 ```
+
+
+#### nginx.conf site
+
+```bash
+
+server {
+    listen 80;
+
+    location /app1 {
+        access_log /var/log/nginx/app1_access.log;
+        return 200;
+    }
+
+    location /app2 {
+        access_log /var/log/nginx/app2_access.log;
+        return 200;
+    }
+}
+
+```
