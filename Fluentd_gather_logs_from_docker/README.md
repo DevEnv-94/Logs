@@ -26,7 +26,7 @@
 ```bash
 
 #Configure default fluentd driver for docker
-#Flunetd is required been configured after this changes of log driver
+#Flunetd is required been configured before this changes of log driver
 
 $ cat /etc/docker/daemon.json 
 
