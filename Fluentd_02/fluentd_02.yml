@@ -12,8 +12,17 @@
 
 - name: Copy Fluentd configuration file to log instance
 
-  hosts: logs
+  hosts: app,logs
   tasks:
+
+      - name: Template td-agent.app.conf.j2 to /etc/td-agent/td-agent.conf
+        ansible.builtin.template:
+          src: td-agent.app.conf.j2
+          dest: /etc/td-agent/td-agent.conf
+          owner: root
+          group: root
+          mode: '0664'
+        when: hostvars[inventory_hostname].group_names[0] == "app" 
 
       - name: Template td-agent.logs.conf.j2 to /etc/td-agent/td-agent.conf
         ansible.builtin.template:
@@ -22,6 +31,7 @@
           owner: root
           group: root
           mode: '0664'
+        when: hostvars[inventory_hostname].group_names[0] == "logs" 
 
       - name: Make sure a fluentd service restarted
         ansible.builtin.systemd:
