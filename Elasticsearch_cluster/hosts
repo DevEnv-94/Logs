@@ -5,7 +5,7 @@
 
 
 [elasticsearch:vars]
-ansible_user=user
+ansible_user=
 ansible_become=true 
 
 [fluent]
@@ -13,7 +13,7 @@ ansible_become=true
 
 
 [fluent:vars]
-ansible_user=user
+ansible_user=
 ansible_become=true 
 ansible_become_pass=
 
@@ -23,6 +23,6 @@ ansible_become_pass=
 
 
 [apps:vars]
-ansible_user=user
+ansible_user=
 ansible_become=true 
 
