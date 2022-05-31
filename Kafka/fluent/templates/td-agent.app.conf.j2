@@ -2,6 +2,7 @@
 
 <source>
   @type tail
+  read_from_head true
   path /var/log/nginx/app1_access.log
   pos_file /var/log/td-agent/nginx.access.app1.pos
   tag nginx.access.app1
@@ -12,6 +13,7 @@
 
 <source>
   @type tail
+  read_from_head true
   path /var/log/nginx/app2_access.log
   pos_file /var/log/td-agent/nginx.access.app2.pos
   tag nginx.access.app2
