@@ -14,6 +14,7 @@
 <source>
 
   @type tail
+  read_from_head true
   path /var/log/app.log
   pos_file /var/log/td-agent/app.log.pos
   tag fluentd

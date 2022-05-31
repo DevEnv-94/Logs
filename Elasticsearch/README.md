@@ -47,6 +47,7 @@ http.host: [_local_, _site_]
 <source>
 
   @type tail
+  read_from_head true
   path /var/log/*.log
   pos_file /var/log/td-agent/pos_file.log.pos
   tag elastic.*

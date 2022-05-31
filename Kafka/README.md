@@ -35,6 +35,7 @@ admin.enableServer=false
 
 <source>
   @type tail
+  read_from_head true
   path /var/log/nginx/app2_access.log
   pos_file /var/log/td-agent/nginx.access.app2.pos
   tag nginx.access.app2
