@@ -8,15 +8,16 @@
 #Fluentd needs read permissions to log files
 
 <source>
-    @type tail
-    @id in_tail_container_logs
-    path /var/lib/docker/containers/*/*-json.log
-    pos_file /fluentd/log/containers.log.pos
-    time_format "%Y-%m-%dT%H:%M:%S.%L%Z"
+  @type tail
+  @id in_tail_container_logs
+  read_from_head true
+  path /var/lib/docker/containers/*/*.log
+  pos_file /var/log/td-agent/docker.log.pos
+  tag "docker.*"
+  <parse>
+    @type json
     keep_time_key true
-    read_from_head true
-    tag "docker.*"
-    format json
+  </parse>
 </source>
 
 ```
