@@ -13,7 +13,6 @@
     - runc
   tags: docker
 
-
 - name: Update repositories cache and install all dependicies for docker and ansible on Ubuntu node.
   apt:
     name: "{{ item }}"
@@ -55,14 +54,12 @@
     - containerd.io
   tags: docker
 
-
 - name: Be sure that docker.service started
   service:
     name: docker
     state: started
     enabled: yes
   tags: docker
-
 
 - name: Install Docker Module for Python
   pip:
@@ -71,8 +68,11 @@
    - docker
   tags: docker
 
+- name: Run docker container with another log-driver than default
+  ansible.builtin.shell: docker run --log-driver=fluentd --log-opt fluentd-address={{ hostvars[groups['fluentd'][0]]['ansible_eth1']['ipv4']['address'] }}:24224 ubuntu echo '"Hello Fluentd!"'
+  tags: docker
 
-- name: Template daemon.json  to /etc/docker/daemon.json 
+- name: (change default log-driver to fluentd) Template daemon.json to /etc/docker/daemon.json with fluentd log-driver
   ansible.builtin.template:
     src: template/docker.daemon.json.j2
     dest: /etc/docker/daemon.json 
@@ -81,7 +81,6 @@
     mode: '0664'
   tags: docker
 
-
 - name: Be sure that docker.service restarted
   service:
     name: docker
@@ -89,7 +88,7 @@
     enabled: yes
   tags: docker
 
-- name: Start a ubuntu container with a command
+- name: Start a ubuntu container with a command 'docker run ubuntu echo "'Hello Default Driver!'"'
   community.docker.docker_container:
     name: Ubuntu
     image: ubuntu:20.04
