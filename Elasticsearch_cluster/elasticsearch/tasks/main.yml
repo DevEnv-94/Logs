@@ -28,6 +28,9 @@
 
 # tasks file for elasticsearch
 
+      - name: Wait for automatic system updates to complete
+        shell: while lsof /var/lib/dpkg/lock-frontend ; do sleep 10; done;
+
       - name: Upgrade Ubuntu system
         apt:
           upgrade: full
@@ -43,6 +46,9 @@
           repo: deb https://artifacts.elastic.co/packages/8.x/apt stable main
           state: present
 
+      - name: Wait for automatic system updates to complete
+        shell: while lsof /var/lib/dpkg/lock-frontend ; do sleep 10; done;
+
       - name: Update repositories cache and install elasticsearch
         apt:
           name: "{{ item }}"
@@ -57,7 +63,6 @@
           src: /etc/elasticsearch/elasticsearch.yml
           dest: /etc/elasticsearch/elasticsearch.config.yml
           remote_src: yes
-
 
 
       - name: Start service elasticsearch, in all cases, also issue daemon-reload to pick up config changes

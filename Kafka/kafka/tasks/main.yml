@@ -1,6 +1,9 @@
 ---
 # tasks file for kafka
 
+- name: Wait for automatic system updates to complete
+  shell: while lsof /var/lib/dpkg/lock-frontend ; do sleep 10; done;
+
 - name: Update repositories cache and install "default-jre" package
   apt:
     name: default-jre

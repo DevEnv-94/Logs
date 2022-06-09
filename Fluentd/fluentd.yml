@@ -28,6 +28,10 @@
 
   hosts: fluentd
   tasks:
+
+      - name: Wait for automatic system updates to complete
+        shell: while lsof /var/lib/dpkg/lock-frontend ; do sleep 10; done;
+
       - name: Update repositories cache and install nginx
         apt:
           name: nginx

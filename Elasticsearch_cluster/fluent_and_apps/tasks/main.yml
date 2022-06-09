@@ -2,6 +2,9 @@
 
 # tasks for fluentd
 
+  - name: Wait for automatic system updates to complete
+    shell: while lsof /var/lib/dpkg/lock-frontend ; do sleep 10; done;
+
   - name: Upgrade Ubuntu system
     apt:
       upgrade: full

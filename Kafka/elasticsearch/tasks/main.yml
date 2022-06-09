@@ -1,6 +1,9 @@
 ---
 # tasks file for elasticsearch
 
+      - name: Wait for automatic system updates to complete
+        shell: while lsof /var/lib/dpkg/lock-frontend ; do sleep 10; done;
+
       - name: Upgrade Ubuntu system
         apt:
           upgrade: full
@@ -15,6 +18,9 @@
         apt_repository:
           repo: deb https://artifacts.elastic.co/packages/8.x/apt stable main
           state: present
+
+      - name: Wait for automatic system updates to complete
+        shell: while lsof /var/lib/dpkg/lock-frontend ; do sleep 10; done;
 
       - name: Update repositories cache and install elasticsearch
         apt:
