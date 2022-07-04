@@ -188,7 +188,7 @@ xpack.security.transport.ssl:
 <source>
   @type syslog
   port 55514
-  tag syslogs
+  tag syslogs.fluent
   bind 127.0.0.1
 </source>
 
